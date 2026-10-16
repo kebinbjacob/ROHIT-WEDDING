@@ -1,15 +1,42 @@
 import { WeddingEvent } from '../config/weddingData';
 
-export function downloadCalendarEvent(event: WeddingEvent, coupleHashtag: string = "#RohithWedsHaritha") {
-  // Convert ISO string to ICS format YYYYMMDDTHHMMSSZ
-  const formatDateToICS = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-  };
+// Format ISO date to Google Calendar & ICS UTC format: YYYYMMDDTHHMMSSZ
+export const formatDateToUTC = (dateStr: string): string => {
+  const d = new Date(dateStr);
+  return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+};
 
-  const startICS = formatDateToICS(event.startTime);
-  const endICS = formatDateToICS(event.endTime);
-  const nowICS = formatDateToICS(new Date().toISOString());
+// Generate direct Google Calendar Event URL
+export function getGoogleCalendarUrl(event: WeddingEvent, coupleHashtag: string = "#RohithWedsHaritha"): string {
+  const startUTC = formatDateToUTC(event.startTime);
+  const endUTC = formatDateToUTC(event.endTime);
+  const title = `${event.title} - Rohith & Haritha`;
+  const location = `${event.venue}, ${event.landmark}, ${event.city}`;
+  const details = `${event.title} - ${coupleHashtag}\n${event.description || ''}\n\nVenue: ${location}\nGoogle Maps: ${event.mapUrl}`;
+
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: title,
+    dates: `${startUTC}/${endUTC}`,
+    details: details,
+    location: location,
+    sprop: 'website:rohithwedsharitha.com'
+  });
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+// Directly open Google Calendar in a new tab / mobile app
+export function openGoogleCalendar(event: WeddingEvent, coupleHashtag: string = "#RohithWedsHaritha") {
+  const url = getGoogleCalendarUrl(event, coupleHashtag);
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+// Fallback .ics file download for Apple / Outlook
+export function downloadCalendarEvent(event: WeddingEvent, coupleHashtag: string = "#RohithWedsHaritha") {
+  const startICS = formatDateToUTC(event.startTime);
+  const endICS = formatDateToUTC(event.endTime);
+  const nowICS = formatDateToUTC(new Date().toISOString());
 
   const location = `${event.venue}, ${event.landmark}, ${event.city}`;
   const description = `${event.title} - ${coupleHashtag}\\n${event.description || ''}\\nLocation: ${location}\\nMap: ${event.mapUrl}`;

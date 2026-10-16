@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Calendar, MapPin, Clock, ExternalLink, Navigation, CalendarPlus } from 'lucide-react';
 import { weddingData } from '../config/weddingData';
 import { DividerFlourish } from './DividerFlourish';
-import { downloadCalendarEvent } from '../utils/calendarUtils';
+import { openGoogleCalendar } from '../utils/calendarUtils';
 
 export const CardCenterpiece: React.FC = () => {
   const [showQRModal, setShowQRModal] = useState(false);
@@ -77,12 +77,12 @@ export const CardCenterpiece: React.FC = () => {
               8:00 Pm
             </span>
             <button
-              onClick={() => downloadCalendarEvent(receptionEvent)}
+              onClick={() => openGoogleCalendar(receptionEvent)}
               className="mt-2 inline-flex items-center gap-1 text-[10px] font-montserrat font-bold text-[#0D6E63] hover:text-[#0A5C53] bg-[#E6F7F0] px-2 py-0.5 rounded border border-[#A7F3D0] transition-colors"
-              title="Add to Google/Apple Calendar"
+              title="Add to Google Calendar"
             >
               <CalendarPlus className="w-2.5 h-2.5" />
-              Calendar
+              Google Calendar
             </button>
           </div>
 
@@ -124,11 +124,12 @@ export const CardCenterpiece: React.FC = () => {
             </a>
 
             <button
-              onClick={() => downloadCalendarEvent(thalikettuEvent)}
-              className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F6FBF8] hover:bg-[#E6F7F0] text-[#1F4E47] font-cinzel text-[11px] font-bold rounded-full border border-[#A7F3D0] transition-colors shadow-sm"
+              onClick={() => openGoogleCalendar(thalikettuEvent)}
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F6FBF8] hover:bg-[#E6F7F0] text-[#0D6E63] font-cinzel text-[11px] font-bold rounded-full border border-[#A7F3D0] transition-colors shadow-sm"
+              title="Add Thalikettu to Google Calendar"
             >
               <CalendarPlus className="w-3 h-3 text-[#0D9488]" />
-              Add Thalikettu to Calendar
+              Add to Google Calendar
             </button>
           </div>
         </div>

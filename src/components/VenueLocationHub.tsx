@@ -1,7 +1,7 @@
 import React from 'react';
 import { MapPin, Navigation, CalendarPlus, ExternalLink, Clock } from 'lucide-react';
 import { weddingData } from '../config/weddingData';
-import { downloadCalendarEvent } from '../utils/calendarUtils';
+import { openGoogleCalendar } from '../utils/calendarUtils';
 
 export const VenueLocationHub: React.FC = () => {
   return (
@@ -82,12 +82,12 @@ export const VenueLocationHub: React.FC = () => {
               </a>
 
               <button
-                onClick={() => downloadCalendarEvent(event)}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#F6FBF8] hover:bg-[#E6F7F0] text-[#1F4E47] hover:text-[#0B3B36] font-cinzel text-xs font-bold rounded-xl border border-[#A7F3D0] transition-colors"
-                title="Add event to phone calendar"
+                onClick={() => openGoogleCalendar(event)}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#F6FBF8] hover:bg-[#E6F7F0] text-[#0D6E63] hover:text-[#0A5C53] font-cinzel text-xs font-bold rounded-xl border border-[#A7F3D0] transition-colors shadow-sm"
+                title="Add event to Google Calendar"
               >
-                <CalendarPlus className="w-3.5 h-3.5 text-[#0D6E63]" />
-                Add to Calendar
+                <CalendarPlus className="w-3.5 h-3.5 text-[#0D9488]" />
+                Google Calendar
               </button>
             </div>
           </div>
