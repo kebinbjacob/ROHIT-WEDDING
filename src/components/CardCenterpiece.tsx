@@ -82,7 +82,7 @@ export const CardCenterpiece: React.FC = () => {
               title="Add to Google Calendar"
             >
               <CalendarPlus className="w-2.5 h-2.5" />
-              Google Calendar
+              Add to Google Calendar
             </button>
           </div>
 

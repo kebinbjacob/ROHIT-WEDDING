@@ -87,7 +87,7 @@ export const VenueLocationHub: React.FC = () => {
                 title="Add event to Google Calendar"
               >
                 <CalendarPlus className="w-3.5 h-3.5 text-[#0D9488]" />
-                Google Calendar
+                Add to Google Calendar
               </button>
             </div>
           </div>
