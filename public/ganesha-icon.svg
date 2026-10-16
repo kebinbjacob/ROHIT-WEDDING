@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Lord Ganesha Emblem in Vibrant Teal-Green & Gold Foil -->
+  <path d="M50 12 C52 12, 54 13.5, 54 16 C54 17.5, 52.5 19, 50 19 C47.5 19, 46 17.5, 46 16 C46 13.5, 48 12, 50 12 Z" fill="#0D6E63" stroke="#D4AF37" stroke-width="0.8"/>
+  <!-- Crown / Mukut -->
+  <path d="M43 20 L57 20 L53 14 L47 14 Z" fill="#0A5C53" stroke="#D4AF37" stroke-width="0.8"/>
+  <circle cx="50" cy="14" r="1.5" fill="#D4AF37"/>
+  <!-- Head & Ears -->
+  <path d="M38 27 C31 22, 25 32, 33 42 C36 45, 39 45, 41 42" stroke="#0D6E63" stroke-width="3" stroke-linecap="round"/>
+  <path d="M62 27 C69 22, 75 32, 67 42 C64 45, 61 45, 59 42" stroke="#0D6E63" stroke-width="3" stroke-linecap="round"/>
+  <!-- Forehead and Tilak -->
+  <path d="M48 23 C48 23 50 25 50 29 C50 25 52 23 52 23" stroke="#D4AF37" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="50" cy="24" r="1.5" fill="#0D6E63"/>
+  <path d="M44 26 Q50 29 56 26" stroke="#D4AF37" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Trunk Curve -->
+  <path d="M46 32 C43 37, 43 51, 46 58 C48 62, 55 64, 57 58 C58 54, 54 50, 50 51 C48 51.5, 48 53, 50 54" stroke="#0A5C53" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Modak in Trunk / Hand -->
+  <circle cx="54" cy="53" r="2.5" fill="#D4AF37" stroke="#0A5C53" stroke-width="1"/>
+  <!-- Body contour -->
+  <path d="M36 48 C30 55, 30 73, 42 78 C52 82, 65 79, 66 68 C67 59, 61 52, 57 49" stroke="#0D6E63" stroke-width="3" stroke-linecap="round"/>
+  <!-- Left tusk & right broken tusk -->
+  <path d="M42 39 L38 41" stroke="#D4AF37" stroke-width="2" stroke-linecap="round"/>
+  <path d="M57 39 L60 41" stroke="#D4AF37" stroke-width="2" stroke-linecap="round"/>
+  <!-- Lotus Petal Base in Mint & Teal -->
+  <path d="M34 82 Q50 87 66 82 Q50 92 34 82 Z" fill="#0A5C53" stroke="#D4AF37" stroke-width="0.8"/>
+  <circle cx="50" cy="84" r="1.5" fill="#D4AF37"/>
+</svg>

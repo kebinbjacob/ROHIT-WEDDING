@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-bg: #F0F7F4;
+    --color-mint-card: #F6FBF8;
+    --color-mint-border: #C2DFD4;
+    --color-teal-vibrant: #0D9488;
+    --color-teal-primary: #0D6E63;
+    --color-teal-dark: #0A5C53;
+    --color-gold: #C5A880;
+  }
+
+  body {
+    background-color: #EEF6F2;
+    color: #0B3B36;
+    overflow-x: hidden;
+  }
+}
+
+/* Pastel Mint Paper Grain Texture */
+.mint-grain {
+  background-color: #F6FBF8;
+  background-image: radial-gradient(#b6ded0 0.75px, transparent 0.75px), radial-gradient(#b6ded0 0.75px, #F6FBF8 0.75px);
+  background-size: 28px 28px;
+  background-position: 0 0, 14px 14px;
+}
+
+/* Letterpress effects adapted for teal & mint */
+.letterpress {
+  text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.9), -0.5px -0.5px 0px rgba(10, 92, 83, 0.18);
+}
+
+.letterpress-deep {
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.95), -1px -1px 1px rgba(10, 92, 83, 0.22);
+}
+
+/* Vibrant Teal & Gold Foil Text */
+.teal-foil-text {
+  background: linear-gradient(135deg, #0A5C53 0%, #0D9488 40%, #D4AF37 60%, #0D6E63 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 3D Wax Seal & Envelope Utilities */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Smooth custom scrollbar in teal & mint */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #E6F7F0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0D9488;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0A5C53;
+}
