@@ -69,11 +69,25 @@ export const RsvpSection: React.FC = () => {
         form.appendChild(input);
       };
 
+      const attendanceVal = weddingData.googleForms.attendanceOptions[attending] || (attending === 'yes' ? 'Yes, joyfully attending' : 'Regretfully declining with best wishes');
+
       appendField(weddingData.googleForms.entryIds.name, fullName);
-      appendField(weddingData.googleForms.entryIds.attendance, attending);
-      appendField(weddingData.googleForms.entryIds.guests, guestCount);
-      appendField(weddingData.googleForms.entryIds.events, selectedEvents.join(', '));
-      appendField(weddingData.googleForms.entryIds.wishes, wishes);
+      appendField(weddingData.googleForms.entryIds.attendance, attendanceVal);
+
+      if (attending === 'yes') {
+        appendField(weddingData.googleForms.entryIds.guests, guestCount);
+        
+        // Append each selected event for Google Forms multi-checkbox
+        selectedEvents.forEach(eventId => {
+          const eventLabel = weddingData.googleForms.eventOptions[eventId as 'thalikettu' | 'reception'] || 
+            (eventId === 'thalikettu' ? 'Marriage Solemnization (Thalikettu)' : 'Wedding Reception');
+          appendField(weddingData.googleForms.entryIds.events, eventLabel);
+        });
+      }
+
+      if (wishes.trim()) {
+        appendField(weddingData.googleForms.entryIds.wishes, wishes.trim());
+      }
 
       document.body.appendChild(form);
       form.submit();

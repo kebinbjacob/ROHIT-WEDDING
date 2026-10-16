@@ -90,14 +90,21 @@ export const weddingData = {
   },
   googleForms: {
     enabled: true,
-    // Google Form formResponse endpoint format
-    formActionUrl: "https://docs.google.com/forms/d/e/1FAIpQLSc_EXAMPLE_FORM_ID/formResponse",
+    formActionUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdDGQIxRMl0wBX7MU3eMOZJtwKGeVTJxLkEph6YeRJEERaVmg/formResponse",
     entryIds: {
-      name: "entry.1045781291",
-      attendance: "entry.2005620554",
-      guests: "entry.1166974658",
-      events: "entry.839337160",
-      wishes: "entry.1065046570"
+      name: "entry.182254296",
+      attendance: "entry.1689545907",
+      guests: "entry.282607825",
+      events: "entry.1223409893",
+      wishes: "entry.659769180"
+    },
+    attendanceOptions: {
+      yes: "Yes, joyfully attending",
+      no: "Regretfully declining with best wishes"
+    },
+    eventOptions: {
+      thalikettu: "Marriage Solemnization (Thalikettu)",
+      reception: "Wedding Reception"
     }
   },
   audio: {
