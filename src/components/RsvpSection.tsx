@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
-import { Send, CheckCircle2, MessageCircle, Heart, User, Users, Sparkles } from 'lucide-react';
+import { CheckCircle2, MessageCircle, Heart, User, Users, Sparkles, Check, Send } from 'lucide-react';
 import { weddingData } from '../config/weddingData';
 
 export const RsvpSection: React.FC = () => {
@@ -9,6 +9,7 @@ export const RsvpSection: React.FC = () => {
   const [guestCount, setGuestCount] = useState('2');
   const [selectedEvents, setSelectedEvents] = useState<string[]>(['thalikettu', 'reception']);
   const [wishes, setWishes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string>('');
 
@@ -18,7 +19,52 @@ export const RsvpSection: React.FC = () => {
     );
   };
 
-  const handleWhatsAppRSVP = (e: React.FormEvent) => {
+  const syncToGoogleForm = () => {
+    try {
+      const form = document.createElement('form');
+      form.action = weddingData.googleForms.formActionUrl;
+      form.method = 'POST';
+      form.target = 'hidden_gform';
+
+      const appendField = (name: string, value: string) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+      };
+
+      const attendanceVal = weddingData.googleForms.attendanceOptions[attending] || 
+        (attending === 'yes' ? 'Yes, joyfully attending' : 'Regretfully declining with best wishes');
+
+      appendField(weddingData.googleForms.entryIds.name, fullName.trim());
+      appendField(weddingData.googleForms.entryIds.attendance, attendanceVal);
+
+      if (attending === 'yes') {
+        appendField(weddingData.googleForms.entryIds.guests, guestCount);
+        
+        // Multi-checkbox options for Google Forms
+        selectedEvents.forEach(eventId => {
+          const eventLabel = weddingData.googleForms.eventOptions[eventId as 'thalikettu' | 'reception'] || 
+            (eventId === 'thalikettu' ? 'Marriage Solemnization (Thalikettu)' : 'Wedding Reception');
+          appendField(weddingData.googleForms.entryIds.events, eventLabel);
+        });
+      }
+
+      if (wishes.trim()) {
+        appendField(weddingData.googleForms.entryIds.wishes, wishes.trim());
+      }
+
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+      setSyncStatus('Recorded directly in family guest list');
+    } catch (err) {
+      console.log('Background form sync handled gracefully', err);
+    }
+  };
+
+  const handleSubmitRSVP = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!fullName.trim()) {
@@ -26,6 +72,20 @@ export const RsvpSection: React.FC = () => {
       return;
     }
 
+    setIsSubmitting(true);
+
+    // Sync to Google Form
+    syncToGoogleForm();
+
+    triggerCelebration();
+
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setSubmitted(true);
+    }, 600);
+  };
+
+  const handleSendViaWhatsApp = () => {
     const eventNames = selectedEvents
       .map(id => (id === 'thalikettu' ? 'Marriage Ceremony (Thalikettu - Shoranur)' : 'Reception (Vailathur)'))
       .join(', ');
@@ -41,69 +101,20 @@ export const RsvpSection: React.FC = () => {
       attending === 'yes' ? `*Attending Events:* ${eventNames || 'Both Events'}` : null,
       wishes.trim() ? `*Heartfelt Wishes:* "${wishes}"` : null,
       `━━━━━━━━━━━━━━━━━━━━`,
-      `_Sent from Rohith & Haritha's Digital Wedding Invitation_`
+      `_Submitted via Rohith & Haritha's Digital Wedding Invitation_`
     ].filter(Boolean).join('\n');
-
-    trySyncGoogleForm();
 
     const encoded = encodeURIComponent(message);
     const waUrl = `https://wa.me/${weddingData.contacts.whatsappNumber}?text=${encoded}`;
     window.open(waUrl, '_blank');
-
-    setSubmitted(true);
-    triggerCelebration();
-  };
-
-  const trySyncGoogleForm = () => {
-    try {
-      const form = document.createElement('form');
-      form.action = weddingData.googleForms.formActionUrl;
-      form.method = 'POST';
-      form.target = 'hidden_gform';
-
-      const appendField = (name: string, value: string) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = name;
-        input.value = value;
-        form.appendChild(input);
-      };
-
-      const attendanceVal = weddingData.googleForms.attendanceOptions[attending] || (attending === 'yes' ? 'Yes, joyfully attending' : 'Regretfully declining with best wishes');
-
-      appendField(weddingData.googleForms.entryIds.name, fullName);
-      appendField(weddingData.googleForms.entryIds.attendance, attendanceVal);
-
-      if (attending === 'yes') {
-        appendField(weddingData.googleForms.entryIds.guests, guestCount);
-        
-        // Append each selected event for Google Forms multi-checkbox
-        selectedEvents.forEach(eventId => {
-          const eventLabel = weddingData.googleForms.eventOptions[eventId as 'thalikettu' | 'reception'] || 
-            (eventId === 'thalikettu' ? 'Marriage Solemnization (Thalikettu)' : 'Wedding Reception');
-          appendField(weddingData.googleForms.entryIds.events, eventLabel);
-        });
-      }
-
-      if (wishes.trim()) {
-        appendField(weddingData.googleForms.entryIds.wishes, wishes.trim());
-      }
-
-      document.body.appendChild(form);
-      form.submit();
-      document.body.removeChild(form);
-      setSyncStatus('Saved securely to family guest list');
-    } catch (err) {
-      console.log('Background form sync handled gracefully', err);
-    }
   };
 
   const triggerCelebration = () => {
     try {
       confetti({
-        particleCount: 70,
+        particleCount: 75,
         spread: 90,
-        origin: { y: 0.7 },
+        origin: { y: 0.65 },
         colors: ['#0D9488', '#14B8A6', '#A7F3D0', '#D4AF37', '#FFFFFF'],
       });
     } catch {
@@ -136,28 +147,46 @@ export const RsvpSection: React.FC = () => {
             <div className="w-16 h-16 bg-[#E6F7F0] border-2 border-[#0D6E63] rounded-full mx-auto flex items-center justify-center text-[#0D6E63] shadow-inner">
               <CheckCircle2 className="w-8 h-8" />
             </div>
-            <h4 className="font-playfair text-2xl font-bold text-[#0D6E63]">
-              Thank You, {fullName}!
-            </h4>
+            
+            <div className="space-y-1">
+              <h4 className="font-playfair text-2xl font-bold text-[#0D6E63]">
+                RSVP Confirmed!
+              </h4>
+              <p className="font-montserrat text-sm font-semibold text-[#0B3B36]">
+                Thank you, {fullName}
+              </p>
+            </div>
+
             <p className="font-cormorant text-lg text-[#1F4E47] italic max-w-md mx-auto">
-              Your RSVP response and warm wishes have been joyfully noted. We eagerly look forward to celebrating together with you!
+              Your RSVP response and warm wishes have been saved directly to our guest list. We eagerly look forward to celebrating together with you!
             </p>
+
             {syncStatus && (
-              <span className="inline-block text-xs font-montserrat text-[#0D6E63] bg-[#E6F7F0] px-3 py-1 rounded-full border border-[#A7F3D0]">
+              <span className="inline-block text-xs font-montserrat text-[#0D6E63] bg-[#E6F7F0] px-3.5 py-1 rounded-full border border-[#A7F3D0] font-medium">
                 ✓ {syncStatus}
               </span>
             )}
-            <div className="pt-4">
+
+            {/* Optional WhatsApp Confirmation Share */}
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={handleSendViaWhatsApp}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#128C7E] font-cinzel text-xs font-bold rounded-xl border border-[#25D366]/40 shadow-sm transition-all hover:scale-105 active:scale-95"
+              >
+                <MessageCircle className="w-4 h-4 text-[#25D366]" />
+                Send Copy on WhatsApp
+              </button>
+
               <button
                 onClick={() => setSubmitted(false)}
-                className="font-cinzel text-xs text-[#0D6E63] underline underline-offset-4 hover:text-[#0A5C53] font-bold"
+                className="text-xs font-cinzel text-[#0D6E63] hover:text-[#0A5C53] font-bold underline underline-offset-4 py-2"
               >
                 Submit another response
               </button>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleWhatsAppRSVP} className="space-y-4 text-left">
+          <form onSubmit={handleSubmitRSVP} className="space-y-4 text-left">
             {/* Full Name */}
             <div>
               <label className="block font-cinzel text-xs font-bold text-[#0B3B36] tracking-wider uppercase mb-1">
@@ -279,19 +308,48 @@ export const RsvpSection: React.FC = () => {
               />
             </div>
 
-            {/* Submit Action */}
-            <div className="pt-2 space-y-2">
+            {/* Action Buttons: SUBMIT RSVP (Primary) + Optional WhatsApp button */}
+            <div className="pt-2 space-y-2.5">
               <button
                 type="submit"
-                className="w-full py-3 px-6 bg-gradient-to-r from-[#0D6E63] via-[#0D9488] to-[#0A5C53] text-[#F0FDF4] font-cinzel text-xs sm:text-sm tracking-[0.2em] font-bold rounded-xl shadow-lg hover:shadow-xl hover:from-[#0D9488] hover:to-[#0D6E63] transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 border border-[#A7F3D0]/60"
+                disabled={isSubmitting}
+                className="w-full py-3.5 px-6 bg-gradient-to-r from-[#0D6E63] via-[#0D9488] to-[#0A5C53] text-[#F0FDF4] font-cinzel text-sm tracking-[0.2em] font-bold rounded-xl shadow-lg hover:shadow-xl hover:from-[#0D9488] hover:to-[#0D6E63] transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 border border-[#A7F3D0]/60 cursor-pointer disabled:opacity-75"
               >
-                <MessageCircle className="w-4 h-4 text-[#A7F3D0]" />
-                SEND RSVP VIA WHATSAPP
-                <Send className="w-3.5 h-3.5 text-[#A7F3D0]" />
+                {isSubmitting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/60 border-t-white rounded-full animate-spin" />
+                    RECORDING RSVP...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4 text-[#A7F3D0]" />
+                    SUBMIT RSVP
+                    <Sparkles className="w-4 h-4 text-[#A7F3D0]" />
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (!fullName.trim()) {
+                    alert('Please enter your full name first');
+                    return;
+                  }
+                  syncToGoogleForm();
+                  handleSendViaWhatsApp();
+                  triggerCelebration();
+                  setSubmitted(true);
+                }}
+                className="w-full py-2.5 px-4 bg-[#E6F7F0] hover:bg-[#D1FAE5] text-[#0D6E63] font-cinzel text-xs font-bold rounded-xl border border-[#A7F3D0] transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <MessageCircle className="w-4 h-4 text-[#0D9488]" />
+                Or Submit & Send via WhatsApp
+                <Send className="w-3.5 h-3.5 text-[#0D9488]" />
               </button>
 
               <p className="text-[11px] font-montserrat text-center text-[#1F4E47] italic">
-                Directly sends to Groom's family WhatsApp ({weddingData.contacts.whatsappNumber}) & records your confirmation.
+                Directly connects to our Google Form guest sheet & confirms your seat instantly.
               </p>
             </div>
           </form>
