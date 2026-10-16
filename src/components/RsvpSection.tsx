@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
-import { CheckCircle2, MessageCircle, Heart, User, Users, Sparkles, Check, Send } from 'lucide-react';
+import { CheckCircle2, MessageCircle, Heart, User, Users, Sparkles, Check, Send, ExternalLink } from 'lucide-react';
 import { weddingData } from '../config/weddingData';
 
 export const RsvpSection: React.FC = () => {
@@ -11,7 +11,7 @@ export const RsvpSection: React.FC = () => {
   const [wishes, setWishes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [syncStatus, setSyncStatus] = useState<string>('');
+  const [prefilledUrl, setPrefilledUrl] = useState('');
 
   const handleEventToggle = (eventId: string) => {
     setSelectedEvents(prev =>
@@ -19,7 +19,74 @@ export const RsvpSection: React.FC = () => {
     );
   };
 
+  const getAttendanceLabel = () => {
+    return weddingData.googleForms.attendanceOptions[attending] || 
+      (attending === 'yes' ? 'Yes, joyfully attending' : 'Regretfully declining with best wishes');
+  };
+
+  const getEventLabels = () => {
+    return selectedEvents.map(eventId => 
+      weddingData.googleForms.eventOptions[eventId as 'thalikettu' | 'reception'] || 
+      (eventId === 'thalikettu' ? 'Marriage Solemnization (Thalikettu)' : 'Wedding Reception')
+    );
+  };
+
+  const buildPrefilledLink = () => {
+    const params = new URLSearchParams();
+    params.append(weddingData.googleForms.entryIds.name, fullName.trim());
+    params.append(weddingData.googleForms.entryIds.attendance, getAttendanceLabel());
+
+    if (attending === 'yes') {
+      params.append(weddingData.googleForms.entryIds.guests, guestCount);
+      getEventLabels().forEach(eventLabel => {
+        params.append(weddingData.googleForms.entryIds.events, eventLabel);
+      });
+    }
+
+    if (wishes.trim()) {
+      params.append(weddingData.googleForms.entryIds.wishes, wishes.trim());
+    }
+
+    const viewformUrl = weddingData.googleForms.formActionUrl.replace('/formResponse', '/viewform?usp=pp_url&');
+    return viewformUrl + params.toString();
+  };
+
   const syncToGoogleForm = () => {
+    const attendanceVal = getAttendanceLabel();
+    const eventLabels = getEventLabels();
+
+    // 1. Send via modern fetch (mode: 'no-cors')
+    try {
+      const formData = new FormData();
+      formData.append('fvv', '1');
+      formData.append('pageHistory', '0');
+      formData.append('submissionTimestamp', '-1');
+      formData.append(weddingData.googleForms.entryIds.name, fullName.trim());
+      formData.append(weddingData.googleForms.entryIds.attendance, attendanceVal);
+
+      if (attending === 'yes') {
+        formData.append(weddingData.googleForms.entryIds.guests, guestCount);
+        eventLabels.forEach(label => {
+          formData.append(weddingData.googleForms.entryIds.events, label);
+        });
+      }
+
+      if (wishes.trim()) {
+        formData.append(weddingData.googleForms.entryIds.wishes, wishes.trim());
+      }
+
+      fetch(weddingData.googleForms.formActionUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData,
+      }).catch(err => {
+        console.log('Fetch sync caught', err);
+      });
+    } catch (e) {
+      console.log('Fetch init error', e);
+    }
+
+    // 2. Also submit via hidden iframe fallback for broad compatibility
     try {
       const form = document.createElement('form');
       form.action = weddingData.googleForms.formActionUrl;
@@ -34,20 +101,16 @@ export const RsvpSection: React.FC = () => {
         form.appendChild(input);
       };
 
-      const attendanceVal = weddingData.googleForms.attendanceOptions[attending] || 
-        (attending === 'yes' ? 'Yes, joyfully attending' : 'Regretfully declining with best wishes');
-
+      appendField('fvv', '1');
+      appendField('pageHistory', '0');
+      appendField('submissionTimestamp', '-1');
       appendField(weddingData.googleForms.entryIds.name, fullName.trim());
       appendField(weddingData.googleForms.entryIds.attendance, attendanceVal);
 
       if (attending === 'yes') {
         appendField(weddingData.googleForms.entryIds.guests, guestCount);
-        
-        // Multi-checkbox options for Google Forms
-        selectedEvents.forEach(eventId => {
-          const eventLabel = weddingData.googleForms.eventOptions[eventId as 'thalikettu' | 'reception'] || 
-            (eventId === 'thalikettu' ? 'Marriage Solemnization (Thalikettu)' : 'Wedding Reception');
-          appendField(weddingData.googleForms.entryIds.events, eventLabel);
+        eventLabels.forEach(label => {
+          appendField(weddingData.googleForms.entryIds.events, label);
         });
       }
 
@@ -57,8 +120,11 @@ export const RsvpSection: React.FC = () => {
 
       document.body.appendChild(form);
       form.submit();
-      document.body.removeChild(form);
-      setSyncStatus('Recorded directly in family guest list');
+      setTimeout(() => {
+        if (document.body.contains(form)) {
+          document.body.removeChild(form);
+        }
+      }, 500);
     } catch (err) {
       console.log('Background form sync handled gracefully', err);
     }
@@ -73,6 +139,10 @@ export const RsvpSection: React.FC = () => {
     }
 
     setIsSubmitting(true);
+
+    // Build pre-filled link
+    const prefill = buildPrefilledLink();
+    setPrefilledUrl(prefill);
 
     // Sync to Google Form
     syncToGoogleForm();
@@ -150,7 +220,7 @@ export const RsvpSection: React.FC = () => {
             
             <div className="space-y-1">
               <h4 className="font-playfair text-2xl font-bold text-[#0D6E63]">
-                RSVP Confirmed!
+                RSVP Recorded!
               </h4>
               <p className="font-montserrat text-sm font-semibold text-[#0B3B36]">
                 Thank you, {fullName}
@@ -158,16 +228,10 @@ export const RsvpSection: React.FC = () => {
             </div>
 
             <p className="font-cormorant text-lg text-[#1F4E47] italic max-w-md mx-auto">
-              Your RSVP response and warm wishes have been saved directly to our guest list. We eagerly look forward to celebrating together with you!
+              Your RSVP response and warm wishes have been submitted. We eagerly look forward to celebrating together with you!
             </p>
 
-            {syncStatus && (
-              <span className="inline-block text-xs font-montserrat text-[#0D6E63] bg-[#E6F7F0] px-3.5 py-1 rounded-full border border-[#A7F3D0] font-medium">
-                ✓ {syncStatus}
-              </span>
-            )}
-
-            {/* Optional WhatsApp Confirmation Share */}
+            {/* Action buttons */}
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
               <button
                 onClick={handleSendViaWhatsApp}
@@ -177,9 +241,23 @@ export const RsvpSection: React.FC = () => {
                 Send Copy on WhatsApp
               </button>
 
+              {prefilledUrl && (
+                <a
+                  href={prefilledUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#F6FBF8] hover:bg-[#E6F7F0] text-[#0D6E63] font-cinzel text-xs font-bold rounded-xl border border-[#A7F3D0] shadow-sm transition-all"
+                >
+                  <ExternalLink className="w-4 h-4 text-[#0D9488]" />
+                  View in Google Form
+                </a>
+              )}
+            </div>
+
+            <div className="pt-2">
               <button
                 onClick={() => setSubmitted(false)}
-                className="text-xs font-cinzel text-[#0D6E63] hover:text-[#0A5C53] font-bold underline underline-offset-4 py-2"
+                className="text-xs font-cinzel text-[#0D6E63] hover:text-[#0A5C53] font-bold underline underline-offset-4 py-1"
               >
                 Submit another response
               </button>
